@@ -1,0 +1,15 @@
+conda create -n nombreProyecto python=version de python
+conda create -n chatBot python=3.9.1
+
+se instalan las librerias
+pip install tensorflow
+pip install numpy
+pip install tflearn
+
+# To activate this environment, use
+#
+#     $ conda activate chatBot
+#
+# To deactivate an active environment, use
+#
+#     $ conda deactivate

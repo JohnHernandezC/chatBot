@@ -1,0 +1,13 @@
+{"contenido":[
+    {"tag": "saludo",
+             "patrones":["hi","hola","buenos dias","buenas tardes","buenas noches","hello"],
+              "respuestas":["Hola como estas?","Un gusto verte","Bienvenido en que puedo ayudarte"]
+},
+{   "tag":"despedida",
+            "patrones":["adios","bye","hasta luego"],
+            "respuestas":["un gusto haberte ayudado","fue un placer","vuelve pronto","adios"]
+
+
+}
+]
+}
