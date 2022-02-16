@@ -13,51 +13,57 @@ import pickle
 #########INICIAR ARHIVO I FILTRAR LOS DATOS DENTRO###################
 with open("cont.json") as respuestas:
     datos= json.load(respuestas)
-print (datos)
+try:    
+  with open("variables.pickle") as archivoPickle:
+    palabras,tags,training,output=pickle.load(archivoPickle)
+#print (datos)
+except:
 
-palabras=[]
-tags=[]
-auxiliar1=[]
-auxiliar2=[]
-for contenido in datos["contenido"]:
-    for patrones in contenido["patrones"]:
-        aux=nltk.word_tokenize(patrones)#toma una frase la separa en palabras
-        palabras.extend(aux)
-        auxiliar1.append(aux)
-        auxiliar2.append(contenido["tag"])
-        if contenido["tag"] not in tags:
-            tags.append(contenido["tag"])
-#####################################################################
+    palabras=[]
+    tags=[]
+    auxiliar1=[]
+    auxiliar2=[]
+    for contenido in datos["contenido"]:
+        for patrones in contenido["patrones"]:
+            aux=nltk.word_tokenize(patrones)#toma una frase la separa en palabras
+            palabras.extend(aux)
+            auxiliar1.append(aux)
+            auxiliar2.append(contenido["tag"])
+            if contenido["tag"] not in tags:
+                tags.append(contenido["tag"])
+    #####################################################################
 
-palabras=[stemmer.stem(w.lower())for w in palabras if w !="?"]
-palabras= sorted(list(set(palabras)))
+    palabras=[stemmer.stem(w.lower())for w in palabras if w !="?"]
+    palabras= sorted(list(set(palabras)))
 
-tags=sorted(tags)
-training=[]
-output=[]
-outputNull=[0 for  _ in range(len(tags))]
+    tags=sorted(tags)
+    training=[]
+    output=[]
+    outputNull=[0 for  _ in range(len(tags))]
 
-for x, document in enumerate(auxiliar1):#x guarda el indice y document la palabra
-    cube=[]
-    auxWord=[stemmer.stem(w.lower())for w in document]
-    for w in palabras:
-        if w in auxWord:
-            cube.append(1)
-        else:
-            cube.append(0)
-    exitRow=outputNull[:]
-    exitRow[tags.index(auxiliar2[x])]=1
-    training.append(cube)
-    output.append(exitRow)
-    
-#print(training)
-#print(output)
-    
-    
-#CREACION DE RED NEURONAL
-training=numpy.array(training)
-output=numpy.array(output)
-
+    for x, document in enumerate(auxiliar1):#x guarda el indice y document la palabra
+        cube=[]
+        auxWord=[stemmer.stem(w.lower())for w in document]
+        for w in palabras:
+            if w in auxWord:
+                cube.append(1)
+            else:
+                cube.append(0)
+        exitRow=outputNull[:]
+        exitRow[tags.index(auxiliar2[x])]=1
+        training.append(cube)
+        output.append(exitRow)
+        
+    #print(training)
+    #print(output)
+        
+        
+    #CREACION DE RED NEURONAL
+    training=numpy.array(training)
+    output=numpy.array(output)
+    with open("variables.pickle","wb") as archivoPickle:
+        pickle.dump((palabras,tags,training,output),archivoPickle)
+#==========================================================================
 tensorflow.compat.v1.reset_default_graph()
 #tensorflow.reset_default_graph()
 red= tflearn.input_data(shape=[None,len(training[0])])#entrada que hace entrenamiento
@@ -69,8 +75,11 @@ red= tflearn.regression(red)
 #CREACION DE MODELO
 
 model= tflearn.DNN(red)
-model.fit(training,output,n_epoch=2000,batch_size=10,show_metric=True)
-model.save("model.tflearn")
+try:
+  model.load("model.tflearn")
+except:
+   model.fit(training,output,n_epoch=2000,batch_size=10,show_metric=True)
+   model.save("model.tflearn")
 #despues de ejecutar se puede ver la efectividad
 #Training Step: 2000  | total loss: ←[1m←[32m0.01018←[0m←[0m
 #| Adam | epoch: 2000 | loss: 0.01018 - acc: 1.0000 -- iter: 9/9 
